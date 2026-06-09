@@ -1,0 +1,221 @@
+
+            padding: 15px 34px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.15rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #2C6F2F;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: #666;
+        }
+
+        .hidden { display: none; }
+
+        .resultado {
+            background: white;
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🐾 VacinaPet Rural</h1>
+        <p>Proteção completa para seus animais</p>
+    </header>
+
+    <div class="progress-container">
+        <div class="progress" id="progress">
+            <div class="step-dot active" data-step="1">1</div>
+            <div class="step-dot" data-step="2">2</div>
+            <div class="step-dot" data-step="3">3</div>
+        </div>
+    </div>
+
+    <!-- PASSO 1 -->
+    <div id="step1" class="form-container">
+        <h2 style="color: var(--verde); text-align: center; margin-bottom: 30px;">📋 Dados dos Animais</h2>
+
+        <label>Espécie do Animal *</label>
+        <select id="especie">
+            <option value="">Selecione a espécie</option>
+            <option value="Bovino">Bovino</option>
+            <option value="Equino">Equino</option>
+            <option value="Suíno">Suíno</option>
+            <option value="Cachorro">Cachorro</option>
+            <option value="Gato">Gato</option>
+            <option value="Ave">Ave</option>
+        </select>
+
+        <label>Idade (em meses) *</label>
+        <input type="number" id="idade" placeholder="Ex: 18" min="1">
+
+        <label>Quantidade de animais *</label>
+        <input type="number" id="quantidade" value="1" min="1">
+
+        <button onclick="proximoPasso(2)">Continuar →</button>
+    </div>
+
+    <!-- PASSO 2 -->
+    <div id="step2" class="hidden form-container">
+        <h2 style="color: var(--verde); text-align: center; margin-bottom: 25px;">
+            💉 Vacinas Recomendadas - <span id="animalInfo"></span>
+        </h2>
+
+        <div id="listaVacinas"></div>
+
+        <div style="margin-top: 35px; display: flex; gap: 15px; flex-wrap: wrap;">
+            <button onclick="proximoPasso(3)">Ver Resumo Final →</button>
+            <button onclick="proximoPasso(1)" class="btn-secondary">← Voltar</button>
+        </div>
+    </div>
+
+    <!-- PASSO 3 -->
+    <div id="step3" class="hidden form-container resultado">
+        <h2 style="text-align: center; color: var(--verde); margin-bottom: 25px;">✅ Resumo de Vacinação</h2>
+        <div id="resultadoFinal"></div>
+        
+        <button onclick="location.reload()" style="background: var(--verde); display: block; margin: 30px auto;">
+            Cadastrar Novo Lote de Animais
+        </button>
+    </div>
+
+    <script>
+        let animal = {};
+
+        const vacinasPorEspecie = {
+            "Bovino": [
+                {nome: "Febre Aftosa", idade: "6 meses (e reforços semestrais)"},
+                {nome: "Brucelose", idade: "3 a 8 meses (fêmeas)"},
+                {nome: "Clostridiose", idade: "4 a 6 meses"},
+                {nome: "Raiva", idade: "4 meses"},
+                {nome: "Leptospirose", idade: "6 meses"},
+                {nome: "IBR / BVD", idade: "6 meses"},
+                {nome: "Botulismo", idade: "Regiões de risco"},
+                {nome: "Desparasitação", idade: "A cada 3-6 meses"}
+            ],
+            "Equino": [
+                {nome: "Raiva", idade: "4 meses"},
+                {nome: "Tétano", idade: "4-6 meses"},
+                {nome: "Influenza Equina", idade: "6 meses"},
+                {nome: "Encefalomielite", idade: "6 meses"},
+                {nome: "Rinopneumonite", idade: "6 meses"},
+                {nome: "Leptospirose", idade: "6 meses"},
+                {nome: "Desparasitação", idade: "A cada 2-3 meses"}
+            ],
+            "Suíno": [
+                {nome: "Circovirose", idade: "3 semanas"},
+                {nome: "Parvovirose", idade: "3-4 semanas"},
+                {nome: "Leptospirose", idade: "2-4 meses"},
+                {nome: "Erisipela", idade: "8-12 semanas"},
+                {nome: "Rinite Atrófica", idade: "3-6 semanas"},
+                {nome: "Mycoplasma", idade: "3 semanas"},
+                {nome: "Raiva", idade: "4 meses"},
+                {nome: "Desparasitação", idade: "A cada 3 meses"}
+            ],
+            "Cachorro": [
+                {nome: "V8 / V10 (Polivalente)", idade: "2-4 meses"},
+                {nome: "Raiva", idade: "4 meses"},
+                {nome: "Gripe Canina", idade: "6-8 meses"},
+                {nome: "Leishmaniose", idade: "4-6 meses (regiões endêmicas)"},
+                {nome: "Giárdia", idade: "3 meses"},
+                {nome: "Desparasitação", idade: "A cada 3 meses"}
+            ],
+            "Gato": [
+                {nome: "V3 / V4 / V5", idade: "2-4 meses"},
+                {nome: "Raiva", idade: "4 meses"},
+                {nome: "Leucemia Felina", idade: "3 meses (opcional)"},
+                {nome: "Desparasitação", idade: "A cada 3 meses"}
+            ],
+            "Ave": [
+                {nome: "Marek", idade: "1 dia"},
+                {nome: "Newcastle", idade: "1-2 semanas"},
+                {nome: "Gumboro", idade: "2-3 semanas"},
+                {nome: "Bronquite Infecciosa", idade: "1-3 semanas"},
+                {nome: "Bouba (Varíola Aviária)", idade: "3-5 semanas"},
+                {nome: "Coriza Infecciosa", idade: "8-10 semanas"},
+                {nome: "Desparasitação", idade: "A cada 2 meses"}
+            ]
+        };
+
+        function proximoPasso(passo) {
+            document.querySelectorAll('.form-container').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.step-dot').forEach(dot => dot.classList.remove('active'));
+
+            if (passo === 2) {
+                animal.especie = document.getElementById('especie').value;
+                animal.idade = parseInt(document.getElementById('idade').value);
+                animal.quantidade = parseInt(document.getElementById('quantidade').value) || 1;
+
+                if (!animal.especie || !animal.idade) {
+                    alert("Por favor, preencha a espécie e a idade dos animais.");
+                    document.getElementById('step1').classList.remove('hidden');
+                    return;
+                }
+
+                document.getElementById('step2').classList.remove('hidden');
+                document.getElementById('animalInfo').textContent = 
+                    `${animal.quantidade} ${animal.especie}(s) • ${animal.idade} meses`;
+
+                const vacinas = vacinasPorEspecie[animal.especie] || vacinasPorEspecie["Cachorro"];
+                
+                let html = '';
+                vacinas.forEach((vacina, i) => {
+                    html += `
+                        <div class="vacina-item checked" onclick="toggleCheck(this)">
+                            <input type="checkbox" id="vac${i}" checked>
+                            <label for="vac${i}">
+                                ${vacina.nome}
+                                <div class="idade-recomendada">Recomendado: ${vacina.idade}</div>
+                            </label>
+                        </div>
+                    `;
+                });
+                document.getElementById('listaVacinas').innerHTML = html;
+
+            } else if (passo === 3) {
+                document.getElementById('step3').classList.remove('hidden');
+                
+                let html = `<p><strong>${animal.quantidade} ${animal.especie}(s)</strong> • ${animal.idade} meses</p><br>`;
+
+                document.querySelectorAll('#listaVacinas .vacina-item').forEach(item => {
+                    const checkbox = item.querySelector('input');
+                    const nome = item.querySelector('label').childNodes[0].textContent.trim();
+                    const idadeRec = item.querySelector('.idade-recomendada').textContent;
+
+                    if (checkbox.checked) {
+                        html += `<p style="color: var(--verde); font-size: 1.15rem;">✅ ${nome} <small>(${idadeRec})</small></p>`;
+                    } else {
+                        html += `<p style="color: #f57c00; font-size: 1.15rem;">⚠️ ${nome} <small>(${idadeRec}) — Pendente</small></p>`;
+                    }
+                });
+
+                document.getElementById('resultadoFinal').innerHTML = html;
+            }
+
+            document.querySelector(`.step-dot[data-step="${passo}"]`).classList.add('active');
+        }
+
+        function toggleCheck(item) {
+            const checkbox = item.querySelector('input');
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                item.classList.add('checked');
+            } else {
+                item.classList.remove('checked');
+            }
+        }
+    </script>
+</body>
+</html>
