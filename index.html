@@ -1,8 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐾 VacinaPet Rural</title>
+    <style>
+        :root {
+            --verde: #388E3C;        /* Verde musgo mais escuro */
+            --verde-claro: #A5D6A7;  /* Verde claro ajustado para melhor contraste */
+            --azul: #1565C0;         /* Azul mais escuro */
+            --azul-claro: #4FC3F7;
+            --cinza: #9E9E9E;
+        }
 
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', sans-serif; 
+        }
+        
+        body {
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--verde);
+            color: white;
+            text-align: center;
+            padding: 2.5rem 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .progress-container {
+            max-width: 700px;
+            margin: 30px auto 10px auto;
+            padding: 0 20px;
+        }
+
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #757575;
+            transition: all 0.4s ease;
+            z-index: 2;
+        }
+
+        .step-dot.active {
+            background: var(--azul);
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 4px 10px rgba(21, 101, 192, 0.4);
+        }
+
+        .form-container {
+            max-width: 720px;
+            margin: 20px auto 40px auto;
+            background: white;
+            padding: 45px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        label {
+            display: block;
+            margin: 20px 0 8px;
+            font-weight: 600;
+            color: var(--verde);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--verde-claro);
+            border-radius: 12px;
+            font-size: 1.05rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--azul);
+            box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.15);
+        }
+
+        .vacina-item {
+            padding: 20px;
+            margin: 14px 0;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 1.12rem;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .vacina-item:hover {
+            transform: translateX(6px);
+        }
+
+        /* Cores dinâmicas dos cards de vacina */
+        .vacina-item.checked {
+            background-color: #E8F5E9;
+            border: 2px solid var(--verde);
+            box-shadow: 0 4px 12px rgba(56, 142, 60, 0.15);
+        }
+
+        .vacina-item:not(.checked) {
+            background-color: #FAFAFA;
+            border: 2px solid var(--cinza);
+            opacity: 0.8;
+        }
+
+        .vacina-item label {
+            margin: 0;
+            color: #333;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            accent-color: var(--verde);
+            cursor: pointer;
+            pointer-events: none; /* Evita conflito de cliques com o card */
+        }
+
+        .idade-recomendada {
+            font-size: 0.92rem;
+            color: #666;
+            margin-top: 3px;
+            font-weight: normal;
+        }
+
+        button {
+            background: var(--verde);
+            color: white;
             padding: 15px 34px;
             border: none;
             border-radius: 12px;
             font-size: 1.15rem;
+            vertical-align: middle;
+            font-weight: 600;
             cursor: pointer;
             margin-top: 20px;
             transition: all 0.3s;
@@ -10,11 +168,16 @@
 
         button:hover {
             background: #2C6F2F;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .btn-secondary {
-            background: #666;
+            background: #757575;
+        }
+        
+        .btn-secondary:hover {
+            background: #616161;
         }
 
         .hidden { display: none; }
@@ -23,7 +186,12 @@
             background: white;
             padding: 35px;
             border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+
+        .resumo-linha {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1rem;
         }
     </style>
 </head>
@@ -42,7 +210,6 @@
         </div>
     </div>
 
-    <!-- PASSO 1 -->
     <div id="step1" class="form-container">
         <h2 style="color: var(--verde); text-align: center; margin-bottom: 30px;">📋 Dados dos Animais</h2>
 
@@ -66,10 +233,9 @@
         <button onclick="proximoPasso(2)">Continuar →</button>
     </div>
 
-    <!-- PASSO 2 -->
     <div id="step2" class="hidden form-container">
         <h2 style="color: var(--verde); text-align: center; margin-bottom: 25px;">
-            💉 Vacinas Recomendadas - <span id="animalInfo"></span>
+            💉 Vacinas Recomendadas - <span id="animalInfo" style="color: var(--azul);"></span>
         </h2>
 
         <div id="listaVacinas"></div>
@@ -80,12 +246,11 @@
         </div>
     </div>
 
-    <!-- PASSO 3 -->
     <div id="step3" class="hidden form-container resultado">
         <h2 style="text-align: center; color: var(--verde); margin-bottom: 25px;">✅ Resumo de Vacinação</h2>
         <div id="resultadoFinal"></div>
         
-        <button onclick="location.reload()" style="background: var(--verde); display: block; margin: 30px auto;">
+        <button onclick="location.reload()" style="background: var(--azul); display: block; margin: 30px auto;">
             Cadastrar Novo Lote de Animais
         </button>
     </div>
@@ -108,7 +273,7 @@
                 {nome: "Raiva", idade: "4 meses"},
                 {nome: "Tétano", idade: "4-6 meses"},
                 {nome: "Influenza Equina", idade: "6 meses"},
-                {nome: "Encefalomielite", idade: "6 meses"},
+                {nome: "Encefalomielite", opacity: "6 meses"},
                 {nome: "Rinopneumonite", idade: "6 meses"},
                 {nome: "Leptospirose", idade: "6 meses"},
                 {nome: "Desparasitação", idade: "A cada 2-3 meses"}
@@ -149,9 +314,6 @@
         };
 
         function proximoPasso(passo) {
-            document.querySelectorAll('.form-container').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.step-dot').forEach(dot => dot.classList.remove('active'));
-
             if (passo === 2) {
                 animal.especie = document.getElementById('especie').value;
                 animal.idade = parseInt(document.getElementById('idade').value);
@@ -159,11 +321,9 @@
 
                 if (!animal.especie || !animal.idade) {
                     alert("Por favor, preencha a espécie e a idade dos animais.");
-                    document.getElementById('step1').classList.remove('hidden');
                     return;
                 }
 
-                document.getElementById('step2').classList.remove('hidden');
                 document.getElementById('animalInfo').textContent = 
                     `${animal.quantidade} ${animal.especie}(s) • ${animal.idade} meses`;
 
@@ -174,35 +334,39 @@
                     html += `
                         <div class="vacina-item checked" onclick="toggleCheck(this)">
                             <input type="checkbox" id="vac${i}" checked>
-                            <label for="vac${i}">
-                                ${vacina.nome}
+                            <label>
+                                <strong>${vacina.nome}</strong>
                                 <div class="idade-recomendada">Recomendado: ${vacina.idade}</div>
                             </label>
                         </div>
                     `;
                 });
                 document.getElementById('listaVacinas').innerHTML = html;
+            }
 
-            } else if (passo === 3) {
-                document.getElementById('step3').classList.remove('hidden');
-                
-                let html = `<p><strong>${animal.quantidade} ${animal.especie}(s)</strong> • ${animal.idade} meses</p><br>`;
+            if (passo === 3) {
+                let html = `<p style="font-size:1.2rem; margin-bottom:15px;">Resumo para: <strong>${animal.quantidade} ${animal.especie}(s)</strong> de ${animal.idade} meses</p>`;
 
                 document.querySelectorAll('#listaVacinas .vacina-item').forEach(item => {
                     const checkbox = item.querySelector('input');
-                    const nome = item.querySelector('label').childNodes[0].textContent.trim();
+                    const nome = item.querySelector('strong').textContent;
                     const idadeRec = item.querySelector('.idade-recomendada').textContent;
 
                     if (checkbox.checked) {
-                        html += `<p style="color: var(--verde); font-size: 1.15rem;">✅ ${nome} <small>(${idadeRec})</small></p>`;
+                        html += `<div class="resumo-linha" style="color: var(--verde);">✅ <strong>${nome}</strong> — <span style="color:#555;">${idadeRec}</span></div>`;
                     } else {
-                        html += `<p style="color: #f57c00; font-size: 1.15rem;">⚠️ ${nome} <small>(${idadeRec}) — Pendente</small></p>`;
+                        html += `<div class="resumo-linha" style="color: #d32f2f;">❌ <strong>${nome}</strong> — <span style="color:#777;">Não selecionada (${idadeRec})</span></div>`;
                     }
                 });
 
                 document.getElementById('resultadoFinal').innerHTML = html;
             }
 
+            // Alternar as telas visíveis
+            document.querySelectorAll('.form-container').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.step-dot').forEach(dot => dot.classList.remove('active'));
+
+            document.getElementById(`step${passo}`).classList.remove('hidden');
             document.querySelector(`.step-dot[data-step="${passo}"]`).classList.add('active');
         }
 
